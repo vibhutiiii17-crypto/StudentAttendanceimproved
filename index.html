@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Attendance – Vanilla HTML/CSS/JS</title>
+  <meta name="description" content="Student Attendance Management System built with plain HTML, CSS and JavaScript." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── Reset ──────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Design Tokens (Light Theme) ───────────────────────────── */
+    :root {
+      --white:      #ffffff;
+      --bg:         #f0f4f8;
+      --bg-card:    #ffffff;
+      --border:     #dde3ed;
+      --primary:    #2563eb;
+      --primary-dk: #1d4ed8;
+      --primary-lt: #eff6ff;
+      --success:    #16a34a;
+      --success-lt: #f0fdf4;
+      --danger:     #dc2626;
+      --danger-lt:  #fef2f2;
+      --text-h:     #1e293b;
+      --text-b:     #475569;
+      --text-m:     #64748b;
+      --text-sm:    #94a3b8;
+      --radius:     10px;
+      --shadow:     0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.06);
+      --shadow-sm:  0 1px 2px rgba(0,0,0,.06);
+    }
+
+    /* ── Base ───────────────────────────────────────────────────── */
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      color: var(--text-b);
+      padding: 2rem 1rem 3rem;
+    }
+
+    /* ── Page Layout ────────────────────────────────────────────── */
+    .page {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    /* ── Top Banner ─────────────────────────────────────────────── */
+    .top-banner {
+      background: var(--primary);
+      border-radius: var(--radius);
+      padding: 1.4rem 1.8rem;
+      margin-bottom: 1.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: .8rem;
+    }
+    .banner-left h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .banner-left p {
+      font-size: .78rem;
+      color: rgba(255,255,255,.75);
+      margin-top: .15rem;
+    }
+    .banner-badge {
+      background: rgba(255,255,255,.18);
+      color: #fff;
+      font-size: .72rem;
+      font-weight: 600;
+      padding: .3rem .85rem;
+      border-radius: 99px;
+      border: 1px solid rgba(255,255,255,.3);
+      letter-spacing: .04em;
+    }
+
+    /* ── Section label ──────────────────────────────────────────── */
+    .section-label {
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-sm);
+      margin-bottom: .6rem;
+      padding-left: .2rem;
+    }
+
+    /* ── Two-column grid ────────────────────────────────────────── */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+      align-items: start;
+    }
+    @media (max-width: 640px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── Card ───────────────────────────────────────────────────── */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.6rem;
+      box-shadow: var(--shadow);
+    }
+    .card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-h);
+      margin-bottom: .3rem;
+    }
+    .card-sub {
+      font-size: .78rem;
+      color: var(--text-m);
+      margin-bottom: 1.4rem;
+      line-height: 1.5;
+    }
+
+    /* ── Step indicator ─────────────────────────────────────────── */
+    .step-row {
+      display: flex;
+      align-items: center;
+      gap: .7rem;
+      margin-bottom: 1.4rem;
+    }
+    .step-dot {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: var(--primary-lt);
+      border: 2px solid var(--primary);
+      color: var(--primary);
+      font-size: .72rem;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .step-title {
+      font-size: .88rem;
+      font-weight: 600;
+      color: var(--text-h);
+    }
+
+    /* ── Form Fields ────────────────────────────────────────────── */
+    .field { margin-bottom: 1rem; }
+    .field label {
+      display: block;
+      font-size: .78rem;
+      font-weight: 600;
+      color: var(--text-h);
+      margin-bottom: .35rem;
+    }
+    .field input,
+    .field select {
+      width: 100%;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-h);
+      font-family: inherit;
+      font-size: .88rem;
+      padding: .65rem .9rem;
+      outline: none;
+      transition: border-color .18s, box-shadow .18s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    .field select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748b' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right .85rem center;
+      background-color: var(--bg);
+      padding-right: 2.2rem;
+      cursor: pointer;
+    }
+    .field input:focus,
+    .field select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+      background: #fff;
+    }
+    .field input::placeholder { color: var(--text-sm); }
+
+    /* error */
+    .err-msg {
+      font-size: .72rem;
+      color: var(--danger);
+      margin-top: .3rem;
+      display: none;
+    }
+    .field.has-error input,
+    .field.has-error select {
+      border-color: var(--danger);
+      background: var(--danger-lt);
+    }
+    .field.has-error .err-msg { display: block; }
+
+    /* ── Status Radio Pills ─────────────────────────────────────── */
+    .pill-group {
+      display: flex;
+      gap: .6rem;
+      margin-bottom: 1.2rem;
+    }
+    .pill-label {
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      padding: .5rem 1rem;
+      border: 1.5px solid var(--border);
+      border-radius: 99px;
+      cursor: pointer;
+      font-size: .82rem;
+      font-weight: 500;
+      color: var(--text-m);
+      background: var(--bg);
+      transition: all .18s;
+      user-select: none;
+    }
+    .pill-label input[type="radio"] { display: none; }
+    .pill-label:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .pill-label.active-present {
+      border-color: var(--primary);
+      background: var(--primary-lt);
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .pill-label.active-absent {
+      border-color: var(--danger);
+      background: var(--danger-lt);
+      color: var(--danger);
+      font-weight: 600;
+    }
+    .pill-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    /* ── Submit Button ──────────────────────────────────────────── */
+    .btn-submit {
+      width: 100%;
+      padding: .75rem 1rem;
+      border: none;
+      border-radius: 8px;
+      background: var(--primary);
+      color: #fff;
+      font-family: inherit;
+      font-size: .9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .18s, transform .12s, box-shadow .18s;
+      box-shadow: 0 2px 8px rgba(37,99,235,.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+    }
+    .btn-submit:hover {
+      background: var(--primary-dk);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(37,99,235,.35);
+    }
+    .btn-submit:active { transform: translateY(0); }
+
+    /* ── Right Panel ────────────────────────────────────────────── */
+
+    /* Empty state */
+    .empty-box {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 3rem 1rem;
+      text-align: center;
+      color: var(--text-sm);
+    }
+    .empty-box .empty-icon { font-size: 2.4rem; margin-bottom: .6rem; }
+    .empty-box p { font-size: .82rem; line-height: 1.6; }
+
+    /* Detail card */
+    .detail-wrap { display: none; }   /* JS shows this */
+
+    .student-header {
+      display: flex;
+      align-items: center;
+      gap: .9rem;
+      padding-bottom: 1rem;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .avatar {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .stu-name {
+      font-size: .98rem;
+      font-weight: 700;
+      color: var(--text-h);
+    }
+    .stu-reg {
+      font-size: .75rem;
+      color: var(--text-m);
+      margin-top: .1rem;
+    }
+
+    /* Info rows */
+    .info-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: .6rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: .84rem;
+    }
+    .info-row:last-of-type { border-bottom: none; }
+    .info-key {
+      color: var(--text-m);
+      font-weight: 500;
+    }
+    .info-val {
+      font-weight: 600;
+      color: var(--text-h);
+    }
+
+    /* Status badges */
+    .badge-present {
+      display: inline-block;
+      background: var(--primary-lt);
+      color: var(--primary);
+      border: 1px solid #bfdbfe;
+      border-radius: 99px;
+      font-size: .75rem;
+      font-weight: 700;
+      padding: .2rem .75rem;
+    }
+    .badge-absent {
+      display: inline-block;
+      background: var(--danger-lt);
+      color: var(--danger);
+      border: 1px solid #fecaca;
+      border-radius: 99px;
+      font-size: .75rem;
+      font-weight: 700;
+      padding: .2rem .75rem;
+    }
+
+    /* Success alert */
+    .alert-success {
+      display: flex;
+      align-items: flex-start;
+      gap: .7rem;
+      background: var(--success-lt);
+      border: 1px solid #bbf7d0;
+      border-radius: 8px;
+      padding: .85rem 1rem;
+      margin-top: 1rem;
+    }
+    .alert-icon {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: var(--success);
+      color: #fff;
+      font-size: .75rem;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      margin-top: .05rem;
+    }
+    .alert-text strong {
+      display: block;
+      font-size: .85rem;
+      font-weight: 700;
+      color: var(--success);
+      margin-bottom: .1rem;
+    }
+    .alert-text span {
+      font-size: .78rem;
+      color: #166534;
+    }
+
+    /* ── Note box (bottom comparison tip) ──────────────────────── */
+    .note-box {
+      margin-top: 1.8rem;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: var(--radius);
+      padding: 1rem 1.2rem;
+    }
+    .note-box h3 {
+      font-size: .82rem;
+      font-weight: 700;
+      color: #92400e;
+      margin-bottom: .6rem;
+    }
+    .note-box ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: .35rem;
+    }
+    .note-box li {
+      font-size: .78rem;
+      color: #78350f;
+      display: flex;
+      gap: .5rem;
+    }
+    .note-box li::before { content: '•'; color: #d97706; }
+
+    /* ── Hidden util ────────────────────────────────────────────── */
+    .hidden { display: none !important; }
+
+    /* ── Footer ─────────────────────────────────────────────────── */
+    .footer {
+      text-align: center;
+      margin-top: 2rem;
+      font-size: .72rem;
+      color: var(--text-sm);
+    }
+  </style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- ── Top Banner ─────────────────────────────────────────────── -->
+  <div class="top-banner">
+    <div class="banner-left">
+      <h1>📋 Student Attendance System</h1>
+      <p>Lab 5 · Vanilla HTML, CSS &amp; JavaScript · No Frameworks</p>
+    </div>
+    <span class="banner-badge">Plain JS</span>
+  </div>
+
+  <!-- ── Two-column grid ────────────────────────────────────────── -->
+  <div class="grid">
+
+    <!-- ─── LEFT : Form ─────────────────────────────────────────── -->
+    <div>
+      <p class="section-label">Step 1 — Fill Details</p>
+      <div class="card">
+
+        <div class="step-row">
+          <div class="step-dot">1</div>
+          <div class="step-title">Enter Student Information</div>
+        </div>
+
+        <form id="attendanceForm" novalidate>
+
+          <!-- Name -->
+          <div class="field" id="field-name">
+            <label for="studentName">Student Name</label>
+            <input
+              type="text"
+              id="studentName"
+              placeholder="e.g. Aarav Sharma"
+              autocomplete="off"
+            />
+            <span class="err-msg">⚠ Please enter the student name.</span>
+          </div>
+
+          <!-- Register No -->
+          <div class="field" id="field-reg">
+            <label for="regNo">Register Number</label>
+            <input
+              type="text"
+              id="regNo"
+              placeholder="e.g. 2647252"
+              autocomplete="off"
+            />
+            <span class="err-msg">⚠ Please enter a valid register number.</span>
+          </div>
+
+          <!-- Course -->
+          <div class="field" id="field-course">
+            <label for="course">Course</label>
+            <select id="course">
+              <option value="">— Select a course —</option>
+              <option value="MCA">MCA</option>
+              <option value="MBA">MBA</option>
+              <option value="BCA">BCA</option>
+              <option value="B.Tech">B.Tech</option>
+              <option value="M.Tech">M.Tech</option>
+              <option value="BBA">BBA</option>
+              <option value="BSc CS">BSc CS</option>
+            </select>
+            <span class="err-msg">⚠ Please select a course.</span>
+          </div>
+
+          <!-- Attendance Status -->
+          <div class="field">
+            <label>Attendance Status</label>
+            <div class="pill-group">
+              <label class="pill-label active-present" id="pill-present">
+                <input type="radio" name="status" value="Present" checked />
+                <span class="pill-dot"></span> Present
+              </label>
+              <label class="pill-label" id="pill-absent">
+                <input type="radio" name="status" value="Absent" />
+                <span class="pill-dot"></span> Absent
+              </label>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-submit" id="submitBtn">
+            ✓ &nbsp;Submit Attendance
+          </button>
+
+        </form>
+      </div><!-- /.card -->
+    </div><!-- /.left -->
+
+    <!-- ─── RIGHT : Result ──────────────────────────────────────── -->
+    <div>
+      <p class="section-label">Step 2 — View Result</p>
+      <div class="card">
+
+        <!-- Empty state (before submit) -->
+        <div id="emptyState">
+          <div class="empty-box">
+            <div class="empty-icon">📄</div>
+            <p>
+              Fill in the form on the left and click<br>
+              <strong>Submit Attendance</strong> to see<br>the result here.
+            </p>
+          </div>
+        </div>
+
+        <!-- Detail panel (after submit) — hidden initially -->
+        <div class="detail-wrap" id="detailWrap">
+
+          <div class="student-header">
+            <div class="avatar" id="d-avatar">?</div>
+            <div>
+              <div class="stu-name" id="d-name">—</div>
+              <div class="stu-reg"  id="d-reg">—</div>
+            </div>
+          </div>
+
+          <div class="info-row">
+            <span class="info-key">Course</span>
+            <span class="info-val" id="d-course">—</span>
+          </div>
+          <div class="info-row">
+            <span class="info-key">Date Recorded</span>
+            <span class="info-val" id="d-date">—</span>
+          </div>
+          <div class="info-row">
+            <span class="info-key">Status</span>
+            <span class="info-val" id="d-status">—</span>
+          </div>
+
+          <div class="alert-success">
+            <div class="alert-icon">✓</div>
+            <div class="alert-text">
+              <strong>Attendance Recorded!</strong>
+              <span>Submit the form again to record the next student.</span>
+            </div>
+          </div>
+
+        </div><!-- /#detailWrap -->
+
+      </div><!-- /.card -->
+    </div><!-- /.right -->
+
+  </div><!-- /.grid -->
+
+  <!-- ── Comparison Note ────────────────────────────────────────── -->
+  <div class="note-box">
+    <h3>⚡ Why Vanilla JS is Different from React</h3>
+    <ul>
+      <li>The right panel only updates <strong>after you click Submit</strong> — not while typing.</li>
+      <li>We manually call <code>getElementById()</code> and set <code>.textContent</code> to update the DOM.</li>
+      <li>All state (name, reg, course) is read directly from the DOM on submit — there is no shared state object.</li>
+      <li>Showing/hiding sections is done by toggling CSS classes (<code>hidden</code>) via JavaScript.</li>
+      <li>In React, all of this is handled automatically by <strong>useState()</strong> and re-rendering.</li>
+    </ul>
+  </div>
+
+</div><!-- /.page -->
+
+<p class="footer">Christ University Bangalore · Lab 5 · Vanilla HTML/CSS/JS</p>
+
+<!-- ── JavaScript ─────────────────────────────────────────────── -->
+<script>
+  /* ── Helpers ─────────────────────────────────────────────────── */
+  const $ = id => document.getElementById(id);
+
+  /* ── Radio pill toggle ───────────────────────────────────────── */
+  /*
+   * NOTE: This is a key vanilla JS limitation vs React.
+   * In React, a status change triggers an automatic re-render.
+   * Here we have to manually add/remove CSS classes ourselves
+   * every time the user clicks a radio button.
+   */
+  document.querySelectorAll('input[name="status"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      const isPresent = $('pill-present').querySelector('input').checked;
+      $('pill-present').className = 'pill-label' + (isPresent ? ' active-present' : '');
+      $('pill-absent').className  = 'pill-label' + (!isPresent ? ' active-absent'  : '');
+    });
+  });
+
+  /* ── Validation ──────────────────────────────────────────────── */
+  /*
+   * In vanilla JS, we query each DOM element individually,
+   * read its .value, and manually toggle error CSS classes.
+   * React does this declaratively via state + conditional classNames.
+   */
+  function validate() {
+    const name   = $('studentName').value.trim();
+    const reg    = $('regNo').value.trim();
+    const course = $('course').value;
+
+    $('field-name').classList.toggle('has-error',   !name);
+    $('field-reg').classList.toggle('has-error',    !reg);
+    $('field-course').classList.toggle('has-error', !course);
+
+    return !!(name && reg && course);
+  }
+
+  /* ── Form Submit ─────────────────────────────────────────────── */
+  /*
+   * In vanilla JS, we wait for the submit event, then manually:
+   *   1. Read values from the DOM
+   *   2. Write values back into different DOM nodes
+   *   3. Show/hide elements with class toggling
+   *
+   * In React, the form and the preview share the SAME state,
+   * so the preview updates automatically as the user types —
+   * no submit button needed for live preview.
+   */
+  $('attendanceForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    if (!validate()) return;   // Stop if invalid
+
+    // Step 1: Read values from the DOM
+    const name   = $('studentName').value.trim();
+    const reg    = $('regNo').value.trim();
+    const course = $('course').value;
+    const status = document.querySelector('input[name="status"]:checked').value;
+    const today  = new Date().toLocaleDateString('en-IN', {
+                    day: 'numeric', month: 'long', year: 'numeric'
+                  });
+
+    // Step 2: Write values into the right-panel DOM nodes manually
+    $('d-avatar').textContent = name.charAt(0).toUpperCase();
+    $('d-name').textContent   = name;
+    $('d-reg').textContent    = 'Reg No: ' + reg;
+    $('d-course').textContent = course;
+    $('d-date').textContent   = today;
+
+    // Status badge — conditional DOM creation
+    const statusEl = $('d-status');
+    statusEl.innerHTML = '';
+    const badge = document.createElement('span');
+    badge.className   = status === 'Present' ? 'badge-present' : 'badge-absent';
+    badge.textContent = status;
+    statusEl.appendChild(badge);
+
+    // Step 3: Show details, hide empty state
+    $('emptyState').classList.add('hidden');
+
+    const panel = $('detailWrap');
+    panel.style.display = 'block';
+
+    // Simple fade-in animation (done manually — no React state change needed)
+    panel.style.opacity   = '0';
+    panel.style.transform = 'translateY(10px)';
+    panel.style.transition = 'opacity .3s ease, transform .3s ease';
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        panel.style.opacity   = '1';
+        panel.style.transform = 'translateY(0)';
+      });
+    });
+  });
+
+  /* ── Clear errors on input ───────────────────────────────────── */
+  /*
+   * Again — manual! React would handle this automatically
+   * because onChange updates state, which triggers a re-render
+   * that recomputes the error display from scratch.
+   */
+  ['studentName', 'regNo', 'course'].forEach(id => {
+    $(id).addEventListener('input', () => {
+      $(id).closest('.field').classList.remove('has-error');
+    });
+  });
+</script>
+
+</body>
+</html>
