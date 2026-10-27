@@ -521,6 +521,45 @@
           </button>
 
         </form>
+
+<h2>Attendance Summary</h2>
+
+<div style="display:flex; gap:15px; flex-wrap:wrap; margin-bottom:20px;">
+  <div style="border:1px solid #ccc; padding:15px; border-radius:8px;">
+    <h3>Total Records</h3>
+    <p id="totalCount">0</p>
+  </div>
+
+  <div style="border:1px solid #ccc; padding:15px; border-radius:8px;">
+    <h3>Present</h3>
+    <p id="presentCount">0</p>
+  </div>
+
+  <div style="border:1px solid #ccc; padding:15px; border-radius:8px;">
+    <h3>Absent</h3>
+    <p id="absentCount">0</p>
+  </div>
+</div>
+        
+<h2>Saved Attendance Records</h2>
+
+<div style="overflow-x: auto;">
+  <table border="1" cellpadding="8" cellspacing="0"
+         style="width:100%; border-collapse:collapse;">
+    <thead>
+      <tr>
+        <th>Student Name</th>
+        <th>Registration No.</th>
+        <th>Course</th>
+        <th>Date</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody id="attendanceTableBody">
+    </tbody>
+  </table>
+</div>
+
       </div><!-- /.card -->
     </div><!-- /.left -->
 
@@ -621,17 +660,41 @@
    * read its .value, and manually toggle error CSS classes.
    * React does this declaratively via state + conditional classNames.
    */
-  function validate() {
-    const name   = $('studentName').value.trim();
-    const reg    = $('regNo').value.trim();
-    const course = $('course').value;
+   
+    
+function validate() {
+  const name = $('studentName').value.trim();
+  const reg = $('regNo').value.trim();
+  const course = $('course').value;
 
-    $('field-name').classList.toggle('has-error',   !name);
-    $('field-reg').classList.toggle('has-error',    !reg);
-    $('field-course').classList.toggle('has-error', !course);
+  const validReg = /^[A-Za-z0-9/-]+$/.test(reg);
 
-    return !!(name && reg && course);
+  $('field-name').classList.toggle('has-error', !name);
+  $('field-reg').classList.toggle('has-error', !reg || !validReg);
+  $('field-course').classList.toggle('has-error', !course);
+
+  if (!name) {
+    alert('Please enter the student name.');
+    return false;
   }
+
+  if (!reg) {
+    alert('Please enter the registration number.');
+    return false;
+  }
+
+  if (!validReg) {
+    alert('Use only letters, numbers, hyphens or slashes in the registration number.');
+    return false;
+  }
+
+  if (!course) {
+    alert('Please select a course.');
+    return false;
+  }
+
+  return true;
+}
 
   /* ── Form Submit ─────────────────────────────────────────────── */
   /*
@@ -658,7 +721,72 @@
                     day: 'numeric', month: 'long', year: 'numeric'
                   });
 
-    // Step 2: Write values into the right-panel DOM nodes manually
+// Check whether attendance was already recorded today
+const now = new Date();
+
+const dateKey =
+  now.getFullYear() + '-' +
+  String(now.getMonth() + 1).padStart(2, '0') + '-' +
+  String(now.getDate()).padStart(2, '0');
+
+const storageKey = 'studentAttendanceRecords';
+
+const records = JSON.parse(
+  localStorage.getItem(storageKey) || '[]'
+);
+
+const alreadyRecorded = records.some(record =>
+  record.reg.toLowerCase() === reg.toLowerCase() &&
+  record.date === dateKey
+);
+
+if (alreadyRecorded) {
+  alert('Attendance has already been recorded for this student today.');
+  return;
+}
+
+records.push({
+  name: name,
+  reg: reg,
+  course: course,
+  status: status,
+  date: dateKey
+});
+
+localStorage.setItem(storageKey, JSON.stringify(records));
+
+const tableBody = $('attendanceTableBody');
+
+tableBody.innerHTML = '';
+
+records.forEach(record => {
+  const row = document.createElement('tr');
+
+  [
+    record.name,
+    record.reg,
+    record.course,
+    record.date,
+    record.status
+  ].forEach(value => {
+    const cell = document.createElement('td');
+    cell.textContent = value;
+    row.appendChild(cell);
+  });
+
+  tableBody.appendChild(row);
+  
+$('totalCount').textContent = records.length;
+
+$('presentCount').textContent =
+  records.filter(record => record.status === 'Present').length;
+
+$('absentCount').textContent =
+  records.filter(record => record.status === 'Absent').length;
+
+});
+
+// Step 2: Write values into the right-panel DOM nodes manually
     $('d-avatar').textContent = name.charAt(0).toUpperCase();
     $('d-name').textContent   = name;
     $('d-reg').textContent    = 'Reg No: ' + reg;
@@ -702,6 +830,45 @@
       $(id).closest('.field').classList.remove('has-error');
     });
   });
+  
+window.addEventListener('DOMContentLoaded', function () {
+  const storageKey = 'studentAttendanceRecords';
+  const records = JSON.parse(
+    localStorage.getItem(storageKey) || '[]'
+  );
+
+  const tableBody = $('attendanceTableBody');
+  if (!tableBody) return;
+
+  tableBody.innerHTML = '';
+
+  records.forEach(record => {
+    const row = document.createElement('tr');
+
+    [
+      record.name,
+      record.reg,
+      record.course,
+      record.date,
+      record.status
+    ].forEach(value => {
+      const cell = document.createElement('td');
+      cell.textContent = value;
+      row.appendChild(cell);
+    });
+
+    tableBody.appendChild(row);
+  });
+  
+$('totalCount').textContent = records.length;
+
+$('presentCount').textContent =
+  records.filter(record => record.status === 'Present').length;
+
+$('absentCount').textContent =
+  records.filter(record => record.status === 'Absent').length;
+
+});
 </script>
 
 </body>
